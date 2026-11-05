@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Mi Despensa</title>
+<style>
+  :root {
+    --bg: #F2F4F8;
+    --card: #FFFFFF;
+    --text: #111827;
+    --subtext: #6B7280;
+    --border: #E5E7EB;
+    --primary: #4F46E5;
+    --green: #10B981;
+    --green-bg: #ECFDF5;
+    --amber: #F59E0B;
+    --amber-bg: #FFFBEB;
+    --red: #EF4444;
+    --red-bg: #FEF2F2;
+    --nav-bg: rgba(255, 255, 255, 0.88);
+  }
+  body.dark {
+    --bg: #0F172A;
+    --card: #1E293B;
+    --text: #F8FAFC;
+    --subtext: #94A3B8;
+    --border: #334155;
+    --primary: #6366F1;
+    --green-bg: rgba(16, 185, 129, 0.15);
+    --amber-bg: rgba(245, 158, 11, 0.15);
+    --red-bg: rgba(239, 68, 68, 0.15);
+    --nav-bg: rgba(30, 41, 59, 0.88);
+  }
+  * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+  body { margin: 0; padding: 16px 16px 100px 16px; background: var(--bg); color: var(--text); transition: background 0.25s, color 0.25s; }
+  
+  /* Cabecera */
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .header h1 { font-size: 24px; font-weight: 800; margin: 0; letter-spacing: -0.5px; }
+  .theme-btn { background: var(--card); border: 1px solid var(--border); color: var(--text); width: 40px; height: 40px; border-radius: 50%; font-size: 18px; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+
+  /* Resumen Dashboard */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
+  .stat-box { padding: 12px 10px; border-radius: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+  .stat-box .num { font-size: 22px; font-weight: 800; display: block; }
+  .stat-box .lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; opacity: 0.85; }
+  .st-red { background: var(--red-bg); color: var(--red); }
+  .st-amber { background: var(--amber-bg); color: var(--amber); }
+  .st-green { background: var(--green-bg); color: var(--green); }
+
+  /* Tarjetas modernas */
+  .card { background: var(--card); padding: 14px; border-radius: 18px; margin-bottom: 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.03); border: 1px solid var(--border); }
+  .cat-header { display: flex; align-items: center; justify-content: space-between; font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 0.6px; margin: 20px 4px 8px 4px; color: var(--primary); }
+  .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+
+  /* Botón de básicos con degradado */
+  .btn-gradient { background: linear-gradient(135deg, #F97316, #EA580C); color: #FFF; border: none; padding: 13px 16px; border-radius: 14px; font-weight: 700; font-size: 14px; width: 100%; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-primary { background: var(--primary); color: #FFF; border: none; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 14px; width: 100%; cursor: pointer; }
+
+  /* Inputs y Chips de categoría */
+  input, select { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; font-size: 15px; margin-bottom: 10px; background: var(--bg); color: var(--text); outline: none; }
+  .chips-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 10px; scrollbar-width: none; }
+  .chips-scroll::-webkit-scrollbar { display: none; }
+  .chip { padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 700; white-space: nowrap; border: 1px solid var(--border); background: var(--card); color: var(--subtext); cursor: pointer; }
+  .chip.active { background: var(--primary); color: #FFF; border-color: var(--primary); }
+
+  /* Semáforo segmentado estilo iOS */
+  .segmented { display: flex; background: var(--bg); padding: 4px; border-radius: 12px; gap: 4px; margin-top: 10px; }
+  .segmented button { flex: 1; border: none; background: transparent; padding: 8px 4px; border-radius: 9px; font-size: 12px; font-weight: 700; color: var(--subtext); cursor: pointer; transition: all 0.2s; }
+  .segmented button.sel-0 { background: var(--green); color: #FFF; box-shadow: 0 2px 6px rgba(16,185,129,0.3); }
+  .segmented button.sel-1 { background: var(--amber); color: #FFF; box-shadow: 0 2px 6px rgba(245,158,11,0.3); }
+  .segmented button.sel-2 { background: var(--red); color: #FFF; box-shadow: 0 2px 6px rgba(239,68,68,0.3); }
+
+  /* Etiquetas de estado */
+  .pill { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; margin-top: 5px; }
+  .pill-red { background: var(--red-bg); color: var(--red); }
+  .pill-amber { background: var(--amber-bg); color: var(--amber); }
+  .qty-badge { background: var(--bg); color: var(--subtext); padding: 3px 8px; border-radius: 8px; font-size: 12px; font-weight: 700; margin-left: 6px; }
+
+  /* Botón check de compra */
+  .check-btn { background: var(--green-bg); color: var(--green); border: 1px solid var(--green); padding: 10px 14px; border-radius: 12px; font-weight: 800; font-size: 13px; cursor: pointer; }
+
+  /* Barra de navegación inferior flotante */
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--nav-bg); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 12px 22px 12px; z-index: 100; }
+  .nav-item { flex: 1; border: none; background: transparent; color: var(--subtext); font-size: 12px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+  .nav-item span.ico { font-size: 20px; }
+  .nav-item.active { color: var(--primary); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1 id="page-title">🛒 Lista de Compra</h1>
+  <button class="theme-btn" onclick="toggleTheme()" id="theme-ico">🌙</button>
+</div>
+
+<!-- Dashboard superior -->
+<div class="stats" id="stats-bar"></div>
+
+<!-- Contenido dinámico -->
+<div id="app"></div>
+
+<!-- Navegación inferior estilo iOS -->
+<div class="bottom-nav">
+  <button class="nav-item active" id="nav-compra" onclick="setVista('compra')">
+    <span class="ico">🛒</span>Comprar
+  </button>
+  <button class="nav-item" id="nav-inventario" onclick="setVista('inventario')">
+    <span class="ico">🏠</span>Inventario
+  </button>
+  <button class="nav-item" id="nav-categorias" onclick="setVista('categorias')">
+    <span class="ico">🏷️</span>Categorías
+  </button>
+</div>
+
+<script>
+const DATOS_SPYDER = {"categorias": ["1. 🥦 Frutas y Verduras", "2. 🥩 Carnes y Pescados", "3. 🥛 Lácteos y Huevos", "4. 🍝 Despensa y Básicos", "5. 🧹 Limpieza y Hogar", "6. ❄️ Congelados"], "productos": []};
+let db = JSON.parse(localStorage.getItem("mi_despensa_iphone_v1")) || DATOS_SPYDER;
+let vista = "compra";
+let filtroCat = "Todas";
+let textoBusqueda = "";
+let dark = localStorage.getItem("mi_despensa_theme") === "dark";
+
+if (dark) { document.body.classList.add("dark"); document.getElementById("theme-ico").innerText = "☀️"; }
+
+function toggleTheme() {
+  dark = !dark;
+  document.body.classList.toggle("dark", dark);
+  localStorage.setItem("mi_despensa_theme", dark ? "dark" : "light");
+  document.getElementById("theme-ico").innerText = dark ? "☀️" : "🌙";
+}
+
+function guardar() {
+  localStorage.setItem("mi_despensa_iphone_v1", JSON.stringify(db));
+  render();
+}
+
+function setVista(v) {
+  vista = v;
+  document.getElementById("page-title").innerText = v === "compra" ? "🛒 Lista de Compra" : (v === "inventario" ? "🏠 Mi Despensa" : "🏷️ Categorías");
+  document.querySelectorAll(".nav-item").forEach(el => el.classList.remove("active"));
+  document.getElementById("nav-" + v).classList.add("active");
+  render();
+}
+
+function cambiarStock(id, estado) {
+  const p = db.productos.find(x => x.id === id);
+  if (p) { p.estado_stock = estado; guardar(); }
+}
+
+function toggleBasico(id) {
+  const p = db.productos.find(x => x.id === id);
+  if (p) { p.es_basico = p.es_basico ? 0 : 1; guardar(); }
+}
+
+function cargarBasicos() {
+  db.productos.forEach(p => { if (p.es_basico === 1 && p.estado_stock === 0) p.estado_stock = 2; });
+  guardar();
+}
+
+function nuevoProd() {
+  const nom = document.getElementById("in-nom").value.trim();
+  const cant = document.getElementById("in-cant").value.trim() || "1 ud";
+  const cat = document.getElementById("in-cat").value;
+  const bas = document.getElementById("in-bas").checked ? 1 : 0;
+  if (!nom) return;
+  db.productos.push({ id: Date.now(), nombre: nom, categoria: cat, cantidad: cant, estado_stock: 2, es_basico: bas });
+  guardar();
+}
+
+function borrarProd(id) {
+  db.productos = db.productos.filter(x => x.id !== id);
+  guardar();
+}
+
+function nuevaCat() {
+  const nom = document.getElementById("in-newcat").value.trim();
+  if (nom && !db.categorias.includes(nom)) { db.categorias.push(nom); db.categorias.sort(); guardar(); }
+}
+
+function borrarCat(c) {
+  db.categorias = db.categorias.filter(x => x !== c);
+  if (!db.categorias.includes("📦 Sin categoría")) db.categorias.push("📦 Sin categoría");
+  db.productos.forEach(p => { if (p.categoria === c) p.categoria = "📦 Sin categoría"; });
+  guardar();
+}
+
+function render() {
+  const nRojo = db.productos.filter(p => p.estado_stock === 2).length;
+  const nAmarillo = db.productos.filter(p => p.estado_stock === 1).length;
+  const nVerde = db.productos.filter(p => p.estado_stock === 0).length;
+
+  document.getElementById("stats-bar").innerHTML = `
+    <div class="stat-box st-red"><span class="num">${nRojo}</span><span class="lbl">Urgentes</span></div>
+    <div class="stat-box st-amber"><span class="num">${nAmarillo}</span><span class="lbl">Queda poco</span></div>
+    <div class="stat-box st-green"><span class="num">${nVerde}</span><span class="lbl">En casa</span></div>
+  `;
+
+  const cont = document.getElementById("app");
+  let html = "";
+
+  if (vista === "compra") {
+    const pendientes = db.productos.filter(p => p.estado_stock > 0).sort((a,b) => a.categoria.localeCompare(b.categoria) || b.estado_stock - a.estado_stock);
+    html += `<button class="btn-gradient" onclick="cargarBasicos()">⭐ Preparar semana (Cargar básicos)</button>`;
+
+    if (pendientes.length === 0) {
+      html += `<div class="card" style="text-align:center;padding:32px 16px;">
+        <div style="font-size:44px;margin-bottom:8px;">🎉</div>
+        <strong style="font-size:17px;">¡Despensa al día!</strong>
+        <p style="color:var(--subtext);font-size:14px;margin:6px 0 0 0;">No tienes ningún producto pendiente de comprar.</p>
+      </div>`;
+    } else {
+      let catAct = null;
+      pendientes.forEach(p => {
+        if (p.categoria !== catAct) { catAct = p.categoria; html += `<div class="cat-header">${catAct}</div>`; }
+        const pill = p.estado_stock === 2 ? `<span class="pill pill-red">🔴 Agotado</span>` : `<span class="pill pill-amber">🟡 Queda poco</span>`;
+        const estrella = p.es_basico ? "⭐ " : "";
+        html += `<div class="card row">
+          <div>
+            <div style="font-weight:700;font-size:16px;">${estrella}${p.nombre}<span class="qty-badge">${p.cantidad}</span></div>
+            ${pill}
+          </div>
+          <button class="check-btn" onclick="cambiarStock(${p.id}, 0)">✓ Listo</button>
+        </div>`;
+      });
+    }
+  } else if (vista === "inventario") {
+    const opts = db.categorias.map(c => `<option value="${c}">${c}</option>`).join("");
+    html += `<div class="card">
+      <div style="font-weight:800;font-size:15px;margin-bottom:10px;">➕ Nuevo producto habitual</div>
+      <div class="row">
+        <input id="in-nom" placeholder="Nombre (ej. Leche entera)" style="flex:2;">
+        <input id="in-cant" value="1 ud" style="flex:1;">
+      </div>
+      <select id="in-cat">${opts}</select>
+      <label style="display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:14px;font-weight:600;">
+        <input type="checkbox" id="in-bas" style="width:18px;height:18px;margin:0;"> ⭐ Marcar como básico semanal
+      </label>
+      <button class="btn-primary" onclick="nuevoProd()">Guardar en mi inventario</button>
+    </div>`;
+
+    html += `<input placeholder="🔍 Buscar producto en la despensa..." value="${textoBusqueda}" oninput="textoBusqueda=this.value;render();">`;
+
+    const chips = ["Todas", ...db.categorias].map(c => `<button class="chip ${c===filtroCat?'active':''}" onclick="filtroCat='${c}';render();">${c}</button>`).join("");
+    html += `<div class="chips-scroll">${chips}</div>`;
+
+    const lista = db.productos.filter(p => (filtroCat === "Todas" || p.categoria === filtroCat) && p.nombre.toLowerCase().includes(textoBusqueda.toLowerCase())).sort((a,b) => a.categoria.localeCompare(b.categoria) || a.nombre.localeCompare(b.nombre));
+    let catAct = null;
+    lista.forEach(p => {
+      if (p.categoria !== catAct) { catAct = p.categoria; html += `<div class="cat-header">${catAct}</div>`; }
+      html += `<div class="card">
+        <div class="row">
+          <div style="font-weight:700;font-size:16px;">${p.nombre}<span class="qty-badge">${p.cantidad}</span></div>
+          <div>
+            <button onclick="toggleBasico(${p.id})" style="border:none;background:none;font-size:18px;cursor:pointer;">${p.es_basico ? '⭐' : '☆'}</button>
+            <button onclick="borrarProd(${p.id})" style="border:none;background:none;font-size:16px;cursor:pointer;opacity:0.7;">🗑️</button>
+          </div>
+        </div>
+        <div class="segmented">
+          <button class="${p.estado_stock===0?'sel-0':''}" onclick="cambiarStock(${p.id},0)">🟢 En casa</button>
+          <button class="${p.estado_stock===1?'sel-1':''}" onclick="cambiarStock(${p.id},1)">🟡 Poco</button>
+          <button class="${p.estado_stock===2?'sel-2':''}" onclick="cambiarStock(${p.id},2)">🔴 Comprar</button>
+        </div>
+      </div>`;
+    });
+  } else {
+    html += `<div class="card">
+      <div style="font-weight:800;font-size:15px;margin-bottom:10px;">➕ Crear sección o pasillo</div>
+      <input id="in-newcat" placeholder="Ej. 7. 🐕 Mascotas">
+      <button class="btn-primary" onclick="nuevaCat()">Añadir categoría</button>
+    </div>`;
+    db.categorias.forEach(c => {
+      html += `<div class="card row"><span style="font-weight:700;">${c}</span><button onclick="borrarCat('${c}')" style="border:none;background:var(--red-bg);color:var(--red);padding:6px 12px;border-radius:8px;font-weight:700;cursor:pointer;">Borrar</button></div>`;
+    });
+  }
+  cont.innerHTML = html;
+}
+render();
+</script>
+</body>
+</html>
